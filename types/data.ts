@@ -15,7 +15,7 @@ export const chunkSchema = z.object({
     chunk_type: z.enum(["image", "text"]),
     source_url: z.string(),
     source_description: z.string(),
-    source_type: z.string(),
+    source_name: z.string(),
     order: z.number(),
 });
 export type Chunk = z.infer<typeof chunkSchema>;
@@ -24,7 +24,7 @@ export const sourceSchema = z.object({
     chunks: z.array(chunkSchema),
     source_url: z.string(),
     source_description: z.string(),
-    source_type: z.string(),
+    source_name: z.string(),
 });
 export type Source = z.infer<typeof sourceSchema>;
 

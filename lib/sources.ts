@@ -18,7 +18,7 @@ export function aggregateSourcesFromChunks(chunks: Chunk[]): Source[] {
                 chunks: [],
                 source_url: chunk.source_url,
                 source_description: chunk.source_description,
-                source_type: chunk.source_type,
+                source_name: chunk.source_name,
             });
         }
 
@@ -47,7 +47,7 @@ export function mergeSourcesWithChunks(existingSources: Source[], newChunks: Chu
                 chunks: [chunk],
                 source_url: chunk.source_url,
                 source_description: chunk.source_description,
-                source_type: chunk.source_type,
+                source_name: chunk.source_name,
             };
             sourceMap.set(key, newSource);
             sourceOrder.push(key);
@@ -111,8 +111,8 @@ export function getContextFromSource(
     return `
     <excerpt-from-source>
     # Source ${citationNumber}
-    ## Source Type
-    ${source.source_type}
+    ## Source Name
+    ${source.source_name}
     ## Source Description
     ${source.source_description}
     ## Source Citation
@@ -195,8 +195,7 @@ export function searchResultsToChunks(results: any): Chunk[] {
                 chunk_type: (fields.chunk_type || metadata.chunk_type || "text") as "image" | "text",
                 source_url: fields.source_url || metadata.source_url || "",
                 source_description: fields.source_description || metadata.source_description || "",
-                source_type: fields.source_type || metadata.source_type || "",
-                class_no: classNo,
+                source_name: fields.source_name || metadata.source_name || "",
                 order: fields.order !== undefined ? fields.order : (metadata.order !== undefined ? metadata.order : 0),
             };
 
