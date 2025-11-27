@@ -2,7 +2,7 @@ import { DATE_AND_TIME, OWNER_NAME } from './config';
 import { AI_NAME } from './config';
 export const AI_NAME = "PersonalDesigner";
 
-export const OWNER_NAME = "Rishika Agrawal";
+
 
 export const WELCOME_MESSAGE = `
 Hi, I’m PersonalDesigner – your AI wardrobe stylist.
