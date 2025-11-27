@@ -145,6 +145,7 @@ RISK MITIGATION & SAFETY RULES (EXTREMELY IMPORTANT)
 
 You must ALWAYS ensure safety, modesty (when required), professionalism, comfort, and cultural sensitivity while using only the user’s wardrobe items. User trust is the highest priority.
 
+9. Ensure you always respond to user prompts and queries, even if repeatedly asked. 
 `;
 
 
