@@ -9,11 +9,10 @@ import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldGroup,
-  FieldLabel,
+  FieldLabel, // <-- This component definition is still imported
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-// **** FIX 1: Reverting to the standard useChat import ****
-import { useChat } from "@ai-sdk/react"; 
+import { useChat } from "@ai-sdk/react";
 import { ArrowUp, Loader2, Plus, Square } from "lucide-react"; 
 import { MessageWall } from "@/components/messages/message-wall";
 import { ChatHeader } from "@/app/parts/chat-header";
@@ -21,17 +20,19 @@ import { ChatHeaderBlock } from "@/app/parts/chat-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UIMessage } from "ai";
 import { useEffect, useState, useRef } from "react";
-import { AI_NAME, CLEAR_CHAT_TEXT, OWNER_NAME, WELCOME_MESSAGE } from "@/config";
+// Import constants from the config file
+import { AI_NAME, CLEAR_CHAT_TEXT, OWNER_NAME, WELCOME_MESSAGE } from "@/config"; 
 import Image from "next/image";
 import Link from "next/link";
 
 // Define the Stylist's Name and Image Path
-const STYLIST_NAME_DISPLAY = "Ava, your Stylist";
-const STYLIST_IMAGE_PATH = "https://files.catbox.moe/hcek6h.png"; 
+const STYLIST_NAME = AI_NAME;
+const STYLIST_IMAGE_PATH = "/logo.png"; 
 
-// Define the pink color
-const ACCENT_COLOR_PINK = "#FFD1DC";
-const NEUTRAL_ACCENT_LIGHT = "#E0E0E0"; 
+// Define the custom colors: This is the pink hue used for accents
+const ACCENT_COLOR_PINK = "#FFD1DC"; 
+const NEUTRAL_ACCENT_LIGHT = "#E0E0E0"; // Light gray used for fallback/neutral UI parts
+
 
 const formSchema = z.object({
   message: z
@@ -82,8 +83,8 @@ export default function Chat() {
   const stored = typeof window !== 'undefined' ? loadMessagesFromStorage() : { messages: [], durations: {} };
   const [initialMessages] = useState<UIMessage[]>(stored.messages);
 
-  // **** FIX 2: Destructure 'sendMessage' (the stable function in your setup) ****
-  const { messages, sendMessage, status, stop, setMessages } = useChat({
+  // FIX: Using append for stable submission (based on the last successful structural fix)
+  const { messages, append, status, stop, setMessages } = useChat({
     messages: initialMessages,
   });
 
@@ -132,12 +133,17 @@ export default function Chat() {
     },
   });
 
-  // **** FIX 3: Robust onSubmit function to ensure history context is preserved ****
+  // FIX: Using append for stable submission (This is the most stable fix for the output bug)
   function onSubmit(data: z.infer<typeof formSchema>) {
-    sendMessage({ text: data.message });
-    form.reset();
-  }
+    const userMessage: UIMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        parts: [{ type: 'text', text: data.message }],
+    };
 
+    append(userMessage);
+    form.reset({ message: "" });
+  }
 
   function clearChat() {
     const newMessages: UIMessage[] = [];
@@ -148,7 +154,8 @@ export default function Chat() {
     toast.success("Chat cleared");
   }
 
- return (
+  return (
+    // Outer container with neutral background (per original code's style)
     <div className="flex h-screen items-center justify-center font-sans dark:bg-black">
       <main className="w-full dark:bg-black h-screen relative">
         <div className="fixed top-0 left-0 right-0 z-50 bg-linear-to-b from-background via-background/50 to-transparent dark:bg-black overflow-visible pb-16">
@@ -157,11 +164,13 @@ export default function Chat() {
               <ChatHeaderBlock />
               <ChatHeaderBlock className="justify-center items-center">
                 <Avatar
-                  className="size-8 ring-1 ring-primary"
+                  // Pink Accents 1: Avatar Ring
+                  className={`size-8 ring-1 ring-[${ACCENT_COLOR_PINK}]`}
                 >
-                  <AvatarImage src="https://files.catbox.moe/hcek6h.png" />
-                  <AvatarFallback>
-                    <Image src="https://files.catbox.moe/hcek6h.png" alt="Logo" width={36} height={36} />
+                  <AvatarImage src={STYLIST_IMAGE_PATH} />
+                  {/* Pink fallback background */}
+                  <AvatarFallback className={`bg-[${ACCENT_COLOR_PINK}]`}>
+                    <Image src="/logo.png" alt="Logo" width={36} height={36} />
                   </AvatarFallback>
                 </Avatar>
                 <p className="tracking-tight">Chat with {AI_NAME}</p>
@@ -170,7 +179,8 @@ export default function Chat() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="cursor-pointer"
+                  // Pink Accents 2: New Chat Button
+                  className={`cursor-pointer bg-[${ACCENT_COLOR_PINK}] hover:bg-[${ACCENT_COLOR_PINK}]/70 border-[${ACCENT_COLOR_PINK}] text-gray-700`}
                   onClick={clearChat}
                 >
                   <Plus className="size-4" />
@@ -209,9 +219,8 @@ export default function Chat() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="chat-form-message" className="sr-only">
-                          Message
-                        </FieldLabel>
+                        {/* **** LABEL REMOVED HERE **** */}
+                        
                         <div className="relative h-13">
                           <Input
                             {...field}
@@ -234,6 +243,8 @@ export default function Chat() {
                               type="submit"
                               disabled={!field.value.trim()}
                               size="icon"
+                              // Pink Accents 3: Send Button
+                              style={{ backgroundColor: ACCENT_COLOR_PINK, color: '#4A4A4A' }}
                             >
                               <ArrowUp className="size-4" />
                             </Button>
