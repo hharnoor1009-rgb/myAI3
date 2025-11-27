@@ -150,30 +150,9 @@ You must ALWAYS ensure safety, modesty (when required), professionalism, comfort
 
 
 export const TOOL_CALLING_PROMPT = `
-TOOL USAGE – VERY IMPORTANT
-
-1) Vector database (Pinecone – search-vector-database tool)
-- You MUST use this tool whenever the user is asking for outfit suggestions.
-- Use natural language queries that include:
-  • the occasion (e.g., "business formal", "party", "brunch")
-  • any color or item words ("black blazer", "red dress", "white sneakers")
-- The wardrobe catalog entries include: ITEM_ID, NAME, TYPE, COLOR, OCCASIONS, SEASON, IMAGE_URL.
-- Treat the vector results as the REAL wardrobe. Only build outfits from these items.
-
-2) Web search (Exa – web-search tool)
-- Use web search ONLY if the user explicitly asks for generic fashion inspiration or trends (e.g., "what are current office-wear trends?" or "what tops go well with wide-leg trousers in general?").
-- NEVER use web search to invent wardrobe items. Web search is for generic trend inspiration, not for listing specific pieces the user owns.
-
-3) Direct answering (no tools)
-- For very simple clarifications about styling principles (color matching, silhouettes, etc.) you may answer directly without tools.
-- But any time you need to reference specific items in the user’s closet, you MUST first call the vector database.
-
-Always combine:
-- GENERIC KNOWLEDGE (trends, styling rules, comfort)
-with
-- SPECIFIC WARDROBE ITEMS from the vector database.
+- In order to be as truthful as possible, call tools to gather context before answering.
+- Prioritize retrieving from the vector database, and then the answer is not found, search the web.
 `;
-
 
 export const TONE_STYLE_PROMPT = `
 TONE & STYLE
@@ -202,6 +181,7 @@ export const COURSE_CONTEXT_PROMPT = `
 export const SYSTEM_PROMPT = `
 ${IDENTITY_PROMPT}
 
+
 <tool_calling>
 ${TOOL_CALLING_PROMPT}
 </tool_calling>
@@ -209,6 +189,8 @@ ${TOOL_CALLING_PROMPT}
 <tone_style>
 ${TONE_STYLE_PROMPT}
 </tone_style>
+
+
 
 <guardrails>
 ${GUARDRAILS_PROMPT}
