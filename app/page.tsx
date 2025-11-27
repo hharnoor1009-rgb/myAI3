@@ -12,7 +12,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-// **** FIX 1: Import useChat and the Message type (handled internally by UIMessage) ****
+// **** FIX 1: Reverting to the standard useChat import ****
 import { useChat } from "@ai-sdk/react"; 
 import { ArrowUp, Loader2, Plus, Square } from "lucide-react"; 
 import { MessageWall } from "@/components/messages/message-wall";
@@ -31,6 +31,7 @@ const STYLIST_IMAGE_PATH = "https://files.catbox.moe/hcek6h.png";
 
 // Define the pink color
 const ACCENT_COLOR_PINK = "#FFD1DC";
+const NEUTRAL_ACCENT_LIGHT = "#E0E0E0"; 
 
 const formSchema = z.object({
   message: z
@@ -81,20 +82,9 @@ export default function Chat() {
   const stored = typeof window !== 'undefined' ? loadMessagesFromStorage() : { messages: [], durations: {} };
   const [initialMessages] = useState<UIMessage[]>(stored.messages);
 
-  // **** FIX 2: Use 'append' for stable submission and add 'onError' handler ****
-  const { 
-    messages, 
-    append, // Robustly adds message and submits
-    status, 
-    stop, 
-    setMessages 
-  } = useChat({
+  // **** FIX 2: Destructure 'sendMessage' (the stable function in your setup) ****
+  const { messages, sendMessage, status, stop, setMessages } = useChat({
     messages: initialMessages,
-    // Add visual feedback on failure
-    onError: (e) => {
-        console.error('Chat API Error:', e);
-        toast.error("Error: Could not get a response. Check your API key or network connection.");
-    }
   });
 
   useEffect(() => {
@@ -142,19 +132,23 @@ export default function Chat() {
     },
   });
 
-  // **** FIX 3: New onSubmit using 'append' for stability ****
+  // **** FIX 3: Robust onSubmit function to ensure history context is preserved ****
   function onSubmit(data: z.infer<typeof formSchema>) {
-    const userMessage: UIMessage = {
+    const textToSubmit = data.message;
+
+    // 1. Manually add the user's message to the history list displayed on screen
+    const newUserMessage: UIMessage = {
         id: Date.now().toString(),
         role: 'user',
-        parts: [{ type: 'text', text: data.message }],
+        parts: [{ type: 'text', text: textToSubmit }],
     };
+    setMessages([...messages, newUserMessage]);
+    
+    // 2. Call the AI API using sendMessage with the content
+    sendMessage({ text: textToSubmit });
 
-    // 1. Append the new message and trigger the streaming response (GUARANTEED FIX)
-    append(userMessage);
-
-    // 2. Clear the form input immediately (now safe to do)
-    form.reset({ message: "" }); 
+    // 3. Clear the form input after submission is handled
+    form.reset({ message: "" });
   }
 
   function clearChat() {
