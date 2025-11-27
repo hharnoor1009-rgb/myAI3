@@ -24,6 +24,13 @@ import { AI_NAME, CLEAR_CHAT_TEXT, OWNER_NAME, WELCOME_MESSAGE } from "@/config"
 import Image from "next/image";
 import Link from "next/link";
 
+// 1. Define the specific name and new image path
+const STYLIST_NAME_DISPLAY = "Ava, your Stylist";
+const STYLIST_IMAGE_PATH = "https://files.catbox.moe/hcek6h.png"; 
+
+// 2. Define the pink color
+const ACCENT_COLOR_PINK = "#FFD1DC";
+
 const formSchema = z.object({
   message: z
     .string()
@@ -145,20 +152,25 @@ export default function Chat() {
               <ChatHeaderBlock />
               <ChatHeaderBlock className="justify-center items-center">
                 <Avatar
-                  className="size-8 ring-1 ring-primary"
+                  // Applying Pink Accents 1: Avatar Ring
+                  className={`size-8 ring-1 ring-[${ACCENT_COLOR_PINK}]`}
                 >
-                  <AvatarImage src="/logo.png" />
-                  <AvatarFallback>
+                  {/* Changed AvatarImage source */}
+                  <AvatarImage src={STYLIST_IMAGE_PATH} />
+                  {/* Pink fallback background */}
+                  <AvatarFallback className={`bg-[${ACCENT_COLOR_PINK}]`}>
                     <Image src="/logo.png" alt="Logo" width={36} height={36} />
                   </AvatarFallback>
                 </Avatar>
-                <p className="tracking-tight">Chat with {AI_NAME}</p>
+                {/* Changed assistant name display */}
+                <p className="tracking-tight">Chat with {STYLIST_NAME_DISPLAY}</p>
               </ChatHeaderBlock>
               <ChatHeaderBlock className="justify-end">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="cursor-pointer"
+                  // Applying Pink Accents 2: New Chat Button
+                  className={`cursor-pointer bg-[${ACCENT_COLOR_PINK}] hover:bg-[${ACCENT_COLOR_PINK}]/70 border-[${ACCENT_COLOR_PINK}] text-gray-700`}
                   onClick={clearChat}
                 >
                   <Plus className="size-4" />
@@ -172,6 +184,7 @@ export default function Chat() {
           <div className="flex flex-col items-center justify-end min-h-full">
             {isClient ? (
               <>
+                {/* **NOTE: MessageWall requires internal modification for pink chat bubbles** */}
                 <MessageWall messages={messages} status={status} durations={durations} onDurationChange={handleDurationChange} />
                 {status === "submitted" && (
                   <div className="flex justify-start max-w-3xl w-full">
@@ -222,6 +235,8 @@ export default function Chat() {
                               type="submit"
                               disabled={!field.value.trim()}
                               size="icon"
+                              // Applying Pink Accents 3: Send Button
+                              style={{ backgroundColor: ACCENT_COLOR_PINK, color: '#4A4A4A' }}
                             >
                               <ArrowUp className="size-4" />
                             </Button>
