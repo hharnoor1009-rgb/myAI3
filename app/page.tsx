@@ -12,8 +12,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useChat } from "@ai-sdk/react";
-import { ArrowUp, Eraser, Loader2, Plus, PlusIcon, Square } from "lucide-react";
+// **** FIX 1: Import useChat and the Message type (handled internally by UIMessage) ****
+import { useChat } from "@ai-sdk/react"; 
+import { ArrowUp, Loader2, Plus, Square } from "lucide-react"; 
 import { MessageWall } from "@/components/messages/message-wall";
 import { ChatHeader } from "@/app/parts/chat-header";
 import { ChatHeaderBlock } from "@/app/parts/chat-header";
@@ -80,8 +81,20 @@ export default function Chat() {
   const stored = typeof window !== 'undefined' ? loadMessagesFromStorage() : { messages: [], durations: {} };
   const [initialMessages] = useState<UIMessage[]>(stored.messages);
 
-  const { messages, sendMessage, status, stop, setMessages } = useChat({
+  // **** FIX 2: Use 'append' for stable submission and add 'onError' handler ****
+  const { 
+    messages, 
+    append, // Robustly adds message and submits
+    status, 
+    stop, 
+    setMessages 
+  } = useChat({
     messages: initialMessages,
+    // Add visual feedback on failure
+    onError: (e) => {
+        console.error('Chat API Error:', e);
+        toast.error("Error: Could not get a response. Check your API key or network connection.");
+    }
   });
 
   useEffect(() => {
@@ -129,29 +142,19 @@ export default function Chat() {
     },
   });
 
-  // **** FIX: New onSubmit using manual history update for guaranteed stability ****
+  // **** FIX 3: New onSubmit using 'append' for stability ****
   function onSubmit(data: z.infer<typeof formSchema>) {
-    const userMessageText = data.message;
-    
-    // 1. Manually construct the user message object
-    const newUserMessage: UIMessage = {
+    const userMessage: UIMessage = {
         id: Date.now().toString(),
         role: 'user',
-        parts: [{ type: 'text', text: userMessageText }],
+        parts: [{ type: 'text', text: data.message }],
     };
 
-    // 2. Optimistically update the message list displayed to the user
-    const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
+    // 1. Append the new message and trigger the streaming response (GUARANTEED FIX)
+    append(userMessage);
 
-    // 3. IMPORTANT: Reset the form input immediately.
-    form.reset({ message: "" });
-    
-    // 4. Send the message payload. By using the external function, 
-    // we ensure the message is submitted based on the updated state.
-    // We send the text directly. The underlying AI SDK should now correctly 
-    // receive the updated 'messages' array via the useChat context.
-    sendMessage({ text: userMessageText });
+    // 2. Clear the form input immediately (now safe to do)
+    form.reset({ message: "" }); 
   }
 
   function clearChat() {
@@ -175,14 +178,12 @@ export default function Chat() {
                   // Pink Accents 1: Avatar Ring
                   className={`size-8 ring-1 ring-[${ACCENT_COLOR_PINK}]`}
                 >
-                  {/* Updated AvatarImage source */}
                   <AvatarImage src={STYLIST_IMAGE_PATH} />
                   {/* Pink fallback background */}
                   <AvatarFallback className={`bg-[${ACCENT_COLOR_PINK}]`}>
                     <Image src="/logo.png" alt="Logo" width={36} height={36} />
                   </AvatarFallback>
                 </Avatar>
-                {/* Updated assistant name display */}
                 <p className="tracking-tight">Chat with {STYLIST_NAME_DISPLAY}</p>
               </ChatHeaderBlock>
               <ChatHeaderBlock className="justify-end">
