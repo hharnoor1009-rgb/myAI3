@@ -134,22 +134,10 @@ export default function Chat() {
 
   // **** FIX 3: Robust onSubmit function to ensure history context is preserved ****
   function onSubmit(data: z.infer<typeof formSchema>) {
-    const textToSubmit = data.message;
-
-    // 1. Manually add the user's message to the history list displayed on screen
-    const newUserMessage: UIMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        parts: [{ type: 'text', text: textToSubmit }],
-    };
-    setMessages([...messages, newUserMessage]);
-    
-    // 2. Call the AI API using sendMessage with the content
-    sendMessage({ text: textToSubmit });
-
-    // 3. Clear the form input after submission is handled
-    form.reset({ message: "" });
+    sendMessage({ text: data.message });
+    form.reset();
   }
+
 
   function clearChat() {
     const newMessages: UIMessage[] = [];
@@ -160,7 +148,7 @@ export default function Chat() {
     toast.success("Chat cleared");
   }
 
-  return (
+ return (
     <div className="flex h-screen items-center justify-center font-sans dark:bg-black">
       <main className="w-full dark:bg-black h-screen relative">
         <div className="fixed top-0 left-0 right-0 z-50 bg-linear-to-b from-background via-background/50 to-transparent dark:bg-black overflow-visible pb-16">
@@ -169,23 +157,20 @@ export default function Chat() {
               <ChatHeaderBlock />
               <ChatHeaderBlock className="justify-center items-center">
                 <Avatar
-                  // Pink Accents 1: Avatar Ring
-                  className={`size-8 ring-1 ring-[${ACCENT_COLOR_PINK}]`}
+                  className="size-8 ring-1 ring-primary"
                 >
-                  <AvatarImage src={STYLIST_IMAGE_PATH} />
-                  {/* Pink fallback background */}
-                  <AvatarFallback className={`bg-[${ACCENT_COLOR_PINK}]`}>
+                  <AvatarImage src="/logo.png" />
+                  <AvatarFallback>
                     <Image src="/logo.png" alt="Logo" width={36} height={36} />
                   </AvatarFallback>
                 </Avatar>
-                <p className="tracking-tight">Chat with {STYLIST_NAME_DISPLAY}</p>
+                <p className="tracking-tight">Chat with {AI_NAME}</p>
               </ChatHeaderBlock>
               <ChatHeaderBlock className="justify-end">
                 <Button
                   variant="outline"
                   size="sm"
-                  // Pink Accents 2: New Chat Button
-                  className={`cursor-pointer bg-[${ACCENT_COLOR_PINK}] hover:bg-[${ACCENT_COLOR_PINK}]/70 border-[${ACCENT_COLOR_PINK}] text-gray-700`}
+                  className="cursor-pointer"
                   onClick={clearChat}
                 >
                   <Plus className="size-4" />
@@ -249,8 +234,6 @@ export default function Chat() {
                               type="submit"
                               disabled={!field.value.trim()}
                               size="icon"
-                              // Pink Accents 3: Send Button
-                              style={{ backgroundColor: ACCENT_COLOR_PINK, color: '#4A4A4A' }}
                             >
                               <ArrowUp className="size-4" />
                             </Button>
